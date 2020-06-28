@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"reflect"
 
 	"github.com/gocolly/colly"
 )
@@ -22,12 +23,18 @@ func writeFile(file []byte) {
 	}
 }
 
-func serializeJSON(foo component) {
-	fmt.Println("Serializing Data", foo)
+func serializeJSON(foo []component) {
+	fmt.Println("Serializing Data")
 	fooJSON, _ := json.Marshal(foo)
+
 	writeFile(fooJSON)
-	fmt.Print("Serializing Complete ")
+	fmt.Println("Serializing Complete ")
 	fmt.Println(string(fooJSON))
+}
+
+func clear(v interface{}) {
+	p := reflect.ValueOf(v).Elem()
+	p.Set(reflect.Zero(p.Type()))
 }
 
 // returns data as a string from file
@@ -52,43 +59,28 @@ func main() {
 	// Instantiate default collector
 	c := colly.NewCollector()
 
-	var element component
-
-	c.OnHTML("#dropdowns > h2:nth-child(6)", func(e *colly.HTMLElement) {
-		element.Name = e.Text
-		// fmt.Print(e.Text)
-	})
-
-	// coin name
-	c.OnHTML("#dropdowns > pre:nth-child(8)", func(e *colly.HTMLElement) {
-		element.Html = e.Text
-	})
-
-	// coin name
 	c.OnHTML(".span9", func(e *colly.HTMLElement) {
-		// element.Html = e.Text
-		// fmt.Println(e.ChildText("#buttonDropdowns > div.page-header > h1"))
-		// fmt.Println(e.ChildText("#dropdowns > pre:nth-child(21)"))
 
+		var components []component
+		var element component
 		data, _ := readLines("components.txt")
 
 		counter := 0
 		for _, line := range data {
-
 			if line != "" {
 				if counter%2 == 0 {
-					fmt.Println("Name:", e.ChildText(line))
+					element.Name = e.ChildText(line)
 				} else {
-					fmt.Println("HTML: ", e.ChildText(line))
+					element.Html = e.ChildText(line)
 				}
-
 				counter = counter + 1
 			} else {
 				counter = 0
-				fmt.Println("__________________________________________")
+				components = append(components, element)
 			}
-
 		}
+
+		serializeJSON(components)
 
 	})
 
@@ -101,7 +93,6 @@ func main() {
 	c.Visit("https://getbootstrap.com/2.3.2/components.html")
 
 	// serialize data to json and write it to file
-	// serializeJSON(element)
 
 	// fmt.Println(element.Name, element.Html)
 
