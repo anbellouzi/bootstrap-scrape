@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -12,8 +13,8 @@ import (
 )
 
 type component struct {
-	Name string `json:"name"`
-	Html string `json:"html"`
+	Name string      `json:"name"`
+	Html interface{} `json:"html"`
 }
 
 func writeFile(file []byte) {
@@ -25,11 +26,14 @@ func writeFile(file []byte) {
 
 func serializeJSON(foo []component) {
 	fmt.Println("Serializing Data")
-	fooJSON, _ := json.Marshal(foo)
-
-	writeFile(fooJSON)
-	fmt.Println("Serializing Complete ")
-	fmt.Println(string(fooJSON))
+	bf := bytes.NewBuffer([]byte{})
+	jsonEncoder := json.NewEncoder(bf)
+	jsonEncoder.SetEscapeHTML(false)
+	jsonEncoder.Encode(foo)
+	res := bytes.ReplaceAll(bf.Bytes(), []byte("\\n"), []byte(""))
+	res = bytes.ReplaceAll(res, []byte("\\"), []byte(""))
+	fmt.Println(string(res))
+	writeFile(res)
 }
 
 func clear(v interface{}) {
