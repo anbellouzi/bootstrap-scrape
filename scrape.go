@@ -71,10 +71,25 @@ func main() {
 		// fmt.Println(e.ChildText("#dropdowns > pre:nth-child(21)"))
 
 		data, _ := readLines("components.txt")
-		for i, line := range data {
-			fmt.Println(i, line)
+
+		counter := 0
+		for _, line := range data {
+
+			if line != "" {
+				if counter%2 == 0 {
+					fmt.Println("Name:", e.ChildText(line))
+				} else {
+					fmt.Println("HTML: ", e.ChildText(line))
+				}
+
+				counter = counter + 1
+			} else {
+				counter = 0
+				fmt.Println("__________________________________________")
+			}
+
 		}
-		
+
 	})
 
 	// Before making a request print "Visiting ..."
