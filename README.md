@@ -7,7 +7,9 @@
 
 ```bash
 📂 bootstrap-scrape
-├──[proposal.md](https://github.com/anbellouzi/bootstrap-scrape/blob/master/proposal.md)
+├──proposal.md
 ├── components.txt
 └── scrape.go
 ```
+
+[Proposal](https://github.com/anbellouzi/bootstrap-scrape/blob/master/proposal.md)
