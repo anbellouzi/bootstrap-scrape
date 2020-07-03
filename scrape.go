@@ -4,41 +4,43 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
+	"net/http"
+	"net/url"
 	"os"
-	"reflect"
+	"strconv"
+	"strings"
 
 	"github.com/gocolly/colly"
 )
 
 type component struct {
-	Name string      `json:"name"`
-	Html interface{} `json:"html"`
+	Name string `json:"name"`
+	Html string `json:"html"`
 }
 
-func writeFile(file []byte) {
-	this := ioutil.WriteFile("output.json", file, 0644)
+// write data to specific file
+func writeFile(file []byte, filename string) {
+	this := ioutil.WriteFile(filename, file, 0644)
 	if err := this; err != nil {
 		panic(err)
 	}
+	fmt.Println("Saved to", filename, "✅")
 }
 
-func serializeJSON(foo []component) {
-	fmt.Println("Serializing Data")
+// serialize components and replace unwaned chars
+func serializeJSON(foo []component, filename string) {
+	fmt.Print("Serializing data... ")
 	bf := bytes.NewBuffer([]byte{})
 	jsonEncoder := json.NewEncoder(bf)
 	jsonEncoder.SetEscapeHTML(false)
 	jsonEncoder.Encode(foo)
 	res := bytes.ReplaceAll(bf.Bytes(), []byte("\\n"), []byte(""))
 	res = bytes.ReplaceAll(res, []byte("\\"), []byte(""))
-	fmt.Println(string(res))
-	writeFile(res)
-}
-
-func clear(v interface{}) {
-	p := reflect.ValueOf(v).Elem()
-	p.Set(reflect.Zero(p.Type()))
+	fmt.Println("✅")
+	writeFile(res, filename)
 }
 
 // returns data as a string from file
@@ -57,9 +59,46 @@ func readLines(path string) ([]string, error) {
 	return lines, scanner.Err()
 }
 
+// part of code adapted from respond by metalim on stackoverflow
+// https://stackoverflow.com/questions/19253469/make-a-url-encoded-post-request-using-http-newrequest
+func post_to_API(name, html string) {
+	apiUrl := "https://bootstrap-api.herokuapp.com/components/add/component"
+
+	data := url.Values{}
+	data.Set("name", name)
+	data.Set("html", html)
+
+	client := &http.Client{}
+	r, err := http.NewRequest("POST", apiUrl, strings.NewReader(data.Encode())) // URL-encoded payload
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+	r.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
+
+	resp, _ := client.Do(r)
+	fmt.Println(resp.Status, name, "Saved! ✅")
+}
+
+// removes all components saved inside API
+func removeAll_APIData() {
+	apiUrl := "https://bootstrap-api.herokuapp.com/components/delete_all"
+
+	client := &http.Client{}
+	r, err := http.NewRequest("DELETE", apiUrl, nil) // URL-encoded payload
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	resp, _ := client.Do(r)
+	fmt.Println(resp.Status, "Removed all components from API! ✅")
+}
+
 // main() contains code adapted from example found in Colly's docs:
 // http://go-colly.org/docs/examples/basic/
-func main() {
+func scrapeData(toAPI, toFile bool, dataFile, filename string) {
 	// Instantiate default collector
 	c := colly.NewCollector()
 
@@ -67,9 +106,9 @@ func main() {
 
 		var components []component
 		var element component
-		data, _ := readLines("components.txt")
-
+		data, _ := readLines(dataFile)
 		counter := 0
+
 		for _, line := range data {
 			if line != "" {
 				if counter%2 == 0 {
@@ -79,13 +118,16 @@ func main() {
 				}
 				counter = counter + 1
 			} else {
+				if toAPI == true {
+					post_to_API(element.Name, element.Html)
+				}
 				counter = 0
 				components = append(components, element)
 			}
 		}
-
-		serializeJSON(components)
-
+		if toFile == true {
+			serializeJSON(components, filename)
+		}
 	})
 
 	// Before making a request print "Visiting ..."
@@ -95,9 +137,20 @@ func main() {
 
 	// Start scraping on https://hackerspaces.org
 	c.Visit("https://getbootstrap.com/2.3.2/components.html")
+}
 
-	// serialize data to json and write it to file
+func main() {
+	filename := flag.String("filename", "output.json", "name of .json or .txt file you want to save components to")
+	toApi := flag.Bool("toApi", false, "true or false do you want to save components to API?")
+	toFile := flag.Bool("toFile", true, "true or false do you want to save components to a file?")
+	dataFile := flag.String("data", "components.txt", ".txt file that contains html selectors you want to scrape")
+	removeAll := flag.Bool("remove", false, "true or false do you want to remove all data from API?")
+	flag.Parse()
 
-	// fmt.Println(element.Name, element.Html)
+	if *removeAll == true {
+		removeAll_APIData()
+	} else {
+		scrapeData(*toApi, *toFile, *dataFile, *filename)
+	}
 
 }
