@@ -96,6 +96,19 @@ func removeAll_APIData() {
 	fmt.Println(resp.Status, "Removed all components from API! ✅")
 }
 
+func get_api_components(filename string) {
+	apiUrl := "https://bootstrap-api.herokuapp.com/components/"
+
+	response, err := http.Get(apiUrl)
+	if err != nil {
+		fmt.Printf("The HTTP request failed with error %s\n", err)
+	} else {
+		data, _ := ioutil.ReadAll(response.Body)
+		fmt.Println("Get request from API complete ✅")
+		writeFile(data, filename)
+	}
+}
+
 // main() contains code adapted from example found in Colly's docs:
 // http://go-colly.org/docs/examples/basic/
 func scrapeData(toAPI, toFile bool, dataFile, filename string) {
@@ -144,11 +157,15 @@ func main() {
 	toApi := flag.Bool("toApi", false, "true or false do you want to save components to API?")
 	toFile := flag.Bool("toFile", true, "true or false do you want to save components to a file?")
 	dataFile := flag.String("data", "components.txt", ".txt file that contains html selectors you want to scrape")
-	removeAll := flag.Bool("remove", false, "true or false do you want to remove all data from API?")
+	removeAll := flag.Bool("remove", false, "true or false do you want to remove all components from API?")
+	readAPI := flag.Bool("readApi", false, "true or false do you want to get all components from API?")
+
 	flag.Parse()
 
 	if *removeAll == true {
 		removeAll_APIData()
+	} else if *readAPI == true {
+		get_api_components(*filename)
 	} else {
 		scrapeData(*toApi, *toFile, *dataFile, *filename)
 	}
