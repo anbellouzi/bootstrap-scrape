@@ -8,6 +8,7 @@
 
 Golang Boostrap web scraper that retrives all boostrap names and html components and saves them into an API or file. 
 
+![Terminal Output](https://i.imgur.com/jUpKKul.png)
 
 ## Project Structure
 
