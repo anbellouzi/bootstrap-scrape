@@ -21,6 +21,14 @@ type component struct {
 	Html string `json:"html"`
 }
 
+func fileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
+}
+
 // write data to specific file
 func writeFile(file []byte, filename string) {
 	this := ioutil.WriteFile(filename, file, 0644)
@@ -61,7 +69,7 @@ func readLines(path string) ([]string, error) {
 
 // part of code adapted from respond by metalim on stackoverflow
 // https://stackoverflow.com/questions/19253469/make-a-url-encoded-post-request-using-http-newrequest
-func post_to_API(name, html string) {
+func post_to_API(name, html string) http.Response {
 	apiUrl := "https://bootstrap-api.herokuapp.com/components/add/component"
 
 	data := url.Values{}
@@ -70,33 +78,37 @@ func post_to_API(name, html string) {
 
 	client := &http.Client{}
 	r, err := http.NewRequest("POST", apiUrl, strings.NewReader(data.Encode())) // URL-encoded payload
+
 	if err != nil {
 		fmt.Println(err)
-		return
 	}
+
 	r.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	r.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
 
 	resp, _ := client.Do(r)
 	fmt.Println(resp.Status, name, "Saved! ✅")
+
+	return *resp
 }
 
 // removes all components saved inside API
-func removeAll_APIData() {
+func removeAll_APIData() http.Response {
 	apiUrl := "https://bootstrap-api.herokuapp.com/components/delete_all"
 
 	client := &http.Client{}
 	r, err := http.NewRequest("DELETE", apiUrl, nil) // URL-encoded payload
 	if err != nil {
 		fmt.Println(err)
-		return
 	}
 
 	resp, _ := client.Do(r)
 	fmt.Println(resp.Status, "Removed all components from API! ✅")
+
+	return *resp
 }
 
-func get_api_components(filename string) {
+func get_api_components(filename string) http.Response {
 	apiUrl := "https://bootstrap-api.herokuapp.com/components/"
 
 	response, err := http.Get(apiUrl)
@@ -107,6 +119,8 @@ func get_api_components(filename string) {
 		fmt.Println("Get request from API complete ✅")
 		writeFile(data, filename)
 	}
+
+	return *response
 }
 
 // main() contains code adapted from example found in Colly's docs:
