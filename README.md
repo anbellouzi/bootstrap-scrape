@@ -2,10 +2,9 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/anbellouzi/bootstrap-scrape)](https://goreportcard.com/report/github.com/anbellouzi/bootstrap-scrape)
 
-[Proposal](https://github.com/anbellouzi/bootstrap-scrape/blob/master/proposal.md) & [Slides](https://docs.google.com/presentation/d/1wEdtHDYqgtV5jkB8GsICcVsf4w5X6eG8RrrZt4qhrAY/edit?usp=sharing)
 
 ## Project Description
-
+###[Proposal](https://github.com/anbellouzi/bootstrap-scrape/blob/master/proposal.md) & [Slides](https://docs.google.com/presentation/d/1wEdtHDYqgtV5jkB8GsICcVsf4w5X6eG8RrrZt4qhrAY/edit?usp=sharing)
 Golang Boostrap web scraper that retrives all boostrap names and html components and saves them into an API or file. 
 
 ![Terminal Output](https://i.imgur.com/jUpKKul.png)
