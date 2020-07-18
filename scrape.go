@@ -30,25 +30,28 @@ func fileExists(filename string) bool {
 }
 
 // write data to specific file
-func writeFile(file []byte, filename string) {
+func writeFile(file []byte, filename string, show bool) {
 	this := ioutil.WriteFile(filename, file, 0644)
 	if err := this; err != nil {
 		panic(err)
 	}
-	fmt.Println("Saved to", filename, "✅")
+	if show {
+		fmt.Println("Saved to", filename, "✅")
+	}
+
 }
 
 // serialize components and replace unwaned chars
-func serializeJSON(foo []component, filename string) {
-	fmt.Print("Serializing data... ")
+func serializeJSON(foo []component, filename string, show bool) {
+	// fmt.Print("Serializing data... ")
 	bf := bytes.NewBuffer([]byte{})
 	jsonEncoder := json.NewEncoder(bf)
 	jsonEncoder.SetEscapeHTML(false)
 	jsonEncoder.Encode(foo)
 	res := bytes.ReplaceAll(bf.Bytes(), []byte("\\n"), []byte(""))
 	res = bytes.ReplaceAll(res, []byte("\\"), []byte(""))
-	fmt.Println("✅")
-	writeFile(res, filename)
+	// fmt.Println("✅")
+	writeFile(res, filename, show)
 }
 
 // returns data as a string from file
@@ -69,7 +72,7 @@ func readLines(path string) ([]string, error) {
 
 // part of code adapted from respond by metalim on stackoverflow
 // https://stackoverflow.com/questions/19253469/make-a-url-encoded-post-request-using-http-newrequest
-func post_to_API(name, html string) http.Response {
+func post_to_API(name, html string, show bool) http.Response {
 	apiUrl := "https://bootstrap-api.herokuapp.com/components/add/component"
 
 	data := url.Values{}
@@ -87,13 +90,16 @@ func post_to_API(name, html string) http.Response {
 	r.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
 
 	resp, _ := client.Do(r)
-	fmt.Println(resp.Status, name, "Saved! ✅")
+
+	if show {
+		fmt.Println(resp.Status, name, "Saved! ✅")
+	}
 
 	return *resp
 }
 
 // removes all components saved inside API
-func removeAll_APIData() http.Response {
+func removeAll_APIData(show bool) http.Response {
 	apiUrl := "https://bootstrap-api.herokuapp.com/components/delete_all"
 
 	client := &http.Client{}
@@ -103,12 +109,13 @@ func removeAll_APIData() http.Response {
 	}
 
 	resp, _ := client.Do(r)
-	fmt.Println(resp.Status, "Removed all components from API! ✅")
-
+	if show {
+		fmt.Println(resp.Status, "Removed all components from API! ✅")
+	}
 	return *resp
 }
 
-func get_api_components(filename string) http.Response {
+func get_api_components(filename string, show bool) http.Response {
 	apiUrl := "https://bootstrap-api.herokuapp.com/components/"
 
 	response, err := http.Get(apiUrl)
@@ -116,8 +123,10 @@ func get_api_components(filename string) http.Response {
 		fmt.Printf("The HTTP request failed with error %s\n", err)
 	} else {
 		data, _ := ioutil.ReadAll(response.Body)
-		fmt.Println("Get request from API complete ✅")
-		writeFile(data, filename)
+		if show {
+			fmt.Println("Get request from API complete ✅")
+		}
+		writeFile(data, filename, true)
 	}
 
 	return *response
@@ -125,7 +134,7 @@ func get_api_components(filename string) http.Response {
 
 // main() contains code adapted from example found in Colly's docs:
 // http://go-colly.org/docs/examples/basic/
-func scrapeData(toAPI, toFile bool, dataFile, filename string) {
+func scrapeData(toAPI, toFile bool, dataFile, filename string, show bool) {
 	// Instantiate default collector
 	c := colly.NewCollector()
 
@@ -146,21 +155,21 @@ func scrapeData(toAPI, toFile bool, dataFile, filename string) {
 				counter = counter + 1
 			} else {
 				if toAPI == true {
-					post_to_API(element.Name, element.Html)
+					post_to_API(element.Name, element.Html, show)
 				}
 				counter = 0
 				components = append(components, element)
 			}
 		}
 		if toFile == true {
-			serializeJSON(components, filename)
+			serializeJSON(components, filename, show)
 		}
 	})
 
 	// Before making a request print "Visiting ..."
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL.String())
-	})
+	// c.OnRequest(func(r *colly.Request) {
+	// 	fmt.Println("Visiting", r.URL.String())
+	// })
 
 	// Start scraping on https://hackerspaces.org
 	c.Visit("https://getbootstrap.com/2.3.2/components.html")
@@ -177,11 +186,11 @@ func main() {
 	flag.Parse()
 
 	if *removeAll == true {
-		removeAll_APIData()
+		removeAll_APIData(true)
 	} else if *readAPI == true {
-		get_api_components(*filename)
+		get_api_components(*filename, true)
 	} else {
-		scrapeData(*toApi, *toFile, *dataFile, *filename)
+		scrapeData(*toApi, *toFile, *dataFile, *filename, true)
 	}
 
 }
