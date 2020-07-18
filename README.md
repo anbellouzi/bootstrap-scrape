@@ -27,13 +27,13 @@ git clone https://github.com/anbellouzi/bootstrap-scrape.git
 cd bootstrap-scrape
 go build scrape.go
 ./scrape
-    - flags: 
-        - filename: 'string var:(optional) output file to store results. Default: output.json'
-	    - toApi: 'bool var:(optional) to post results to API. Defailt: false'
-	    - toFile: 'bool var:(optional) to write results to filename. Default: true'
-	    - data: 'string var:(optional) file that contains html selectors. default: components.txt'
-	    - remove: 'bool var:(optional) remove all components from API. default: false'
-	    - readAPI: 'bool var:(optional) get all components from API. default: false'
+    -flags: 
+        -filename= 'string var:(optional) output file to store results. Default: output.json'
+	    -toApi= 'bool var:(optional) to post results to API. Defailt: false'
+	    -toFile= 'bool var:(optional) to write results to filename. Default: true'
+	    -data= 'string var:(optional) file that contains html selectors. default: components.txt'
+	    -remove= 'bool var:(optional) remove all components from API. default: false'
+	    -readAPI= 'bool var:(optional) get all components from API. default: false'
 ```
 
 
