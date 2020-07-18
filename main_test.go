@@ -53,45 +53,51 @@ func BenchmarkPostAPI(b *testing.B) {
 	}
 }
 
+func BenchmarkReadAPI(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		get_api_components("readAPI-test.txt", false)
+	}
+}
+
 func BenchmarkScrapeSingleToNON(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		dataFile := "single_component.txt"
-		scrapeData(false, false, dataFile, "testing.txt", false)
+		scrapeData(false, false, dataFile, "scrape-to-non.txt", false)
 	}
 }
 
 func BenchmarkScrapeSingleToFile(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		dataFile := "single_component.txt"
-		scrapeData(false, true, dataFile, "testing.txt", false)
+		scrapeData(false, true, dataFile, "scrape-tofile-test.txt", false)
 	}
 }
 
 func BenchmarkScrapeSingleToAPI(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		dataFile := "single_component.txt"
-		scrapeData(true, false, dataFile, "testing.txt", false)
+		scrapeData(true, false, dataFile, "singleToAPI.txt", false)
 	}
 }
 
 func BenchmarkScrapeSingleToALL(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		dataFile := "single_component.txt"
-		scrapeData(true, true, dataFile, "testing.txt", false)
+		scrapeData(true, true, dataFile, "single-toAll-test.txt", false)
 	}
 }
 
 func BenchmarkScrapeAllToNON(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		dataFile := "components.txt"
-		scrapeData(false, false, dataFile, "testing.txt", false)
+		scrapeData(false, false, dataFile, "ScrapeAllToNON.txt", false)
 	}
 }
 
 func BenchmarkScrapeAllToFile(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		dataFile := "components.txt"
-		scrapeData(false, true, dataFile, "testing.txt", false)
+		scrapeData(false, true, dataFile, "AllToFile.txt", false)
 	}
 }
 
@@ -104,6 +110,6 @@ func BenchmarkDeleteAllAPI(b *testing.B) {
 func BenchmarkScrapeAllToAPI(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		dataFile := "components.txt"
-		scrapeData(true, false, dataFile, "testing.txt", false)
+		scrapeData(true, false, dataFile, "AllToAPI.txt", false)
 	}
 }

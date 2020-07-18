@@ -36,7 +36,7 @@ func writeFile(file []byte, filename string, show bool) {
 		panic(err)
 	}
 	if show {
-		fmt.Println("Saved to", filename, "✅")
+		// fmt.Println("Saved to", filename, "✅")
 	}
 
 }

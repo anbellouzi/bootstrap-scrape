@@ -28,14 +28,13 @@ cd bootstrap-scrape
 go build scrape.go
 ./scrape
     - flags: 
-        - filename: 'name of .json or .txt file you want to save components to'
-	    - toApi: 'true or false do you want to save components to API?'
-	    - toFile: 'true or false do you want to save components to a file?'
-	    - data: '.txt file that contains html selectors you want to scrape'
-	    - remove: 'true or false do you want to remove all components from API?'
-	    - readAPI: 'true or false do you want to get all components from API?'
+        - filename: 'string var:(optional) output file to store results. Default: output.json'
+	    - toApi: 'bool var:(optional) to post results to API. Defailt: false'
+	    - toFile: 'bool var:(optional) to write results to filename. Default: true'
+	    - data: 'string var:(optional) file that contains html selectors. default: components.txt'
+	    - remove: 'bool var:(optional) remove all components from API. default: false'
+	    - readAPI: 'bool var:(optional) get all components from API. default: false'
 ```
-
 
 
 
